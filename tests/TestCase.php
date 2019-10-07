@@ -1,8 +1,7 @@
 <?php
 
 use App\Exceptions\Handler;
-use Illuminate\Contracts\Container\Container;
-use Symfony\Component\Debug\ExceptionHandler;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 
 abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
 {
@@ -36,7 +35,7 @@ abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
 
             public function render($request, Exception $exception)
             {
-                throw  $exception;
+                throw $exception;
             }
         });
     }

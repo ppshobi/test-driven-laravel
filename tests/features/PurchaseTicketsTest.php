@@ -10,21 +10,19 @@ class PurchaseTicketsTest extends TestCase
     use DatabaseMigrations;
 
     protected $paymentGateway;
-
     protected function setUp()
     {
         parent::setUp();
 
         $this->paymentGateway = new FakePaymentGateway;
         $this->app->instance(PaymentGateway::class, $this->paymentGateway);
-
     }
-
     /**
      * @test
      */
     function customer_can_purchase_concert_tickets()
     {
+        $this->disableExceptionHandling();
         $concert = factory(Concert::class)->create([
             'ticket_price' => 3250,
         ]);
@@ -32,11 +30,11 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email'           => 'me@example.com',
             'ticket_quantity' => 3,
-            'purchase_token'  => $this->paymentGateway->getValidTestToken(),
+            'payment_token'  => $this->paymentGateway->getValidTestToken(),
         ]);
 
         $this->assertResponseStatus(201);
-        $this->assertEquals(9750, $paymentGateway->totalCharges());
+        $this->assertEquals(9750, $this->paymentGateway->totalCharges());
 
         $order = $concert->orders()
             ->where('email', 'me@example.com')
@@ -62,6 +60,30 @@ class PurchaseTicketsTest extends TestCase
         $this->assertResponseStatus(422);
 
         $this->assertArrayHasKey('email', $this->decodeResponseJson());
+    }
+
+    /**
+     * @test
+     **/
+    function order_is_not_created_if_payment_fails()
+    {
+//        $this->disableExceptionHandling();
+        $concert = factory(Concert::class)->create();
+
+        $this->json('POST', "/concerts/{$concert->id}/orders", [
+            'email'           => 'jane@example.com',
+            'ticket_quantity' => 3,
+            'purchase_token'  => 'invalid-token',
+        ]);
+
+
+        $this->assertResponseStatus(422);
+        $order = $concert->orders()
+            ->where('email', 'jane@example.com')
+            ->first();
+
+        $this->assertNull($order);
+
     }
 
 }
