@@ -1,39 +1,43 @@
 <?php
 
-use App\Concert;
-use Carbon\Carbon;
-use App\Billing\PaymentGateway;
 use App\Billing\FakePaymentGateway;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
+use App\Billing\PaymentGateway;
+use App\Concert;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class PurchaseTicketsTest extends TestCase
 {
     use DatabaseMigrations;
 
-    /**
-     * @test 
-     */
-    function customer_can_purchase_concert_tickets() 
+    protected $paymentGateway;
+
+    protected function setUp()
     {
-        $paymentGateway = new FakePaymentGateway;
+        parent::setUp();
 
-        $this->app->instance(PaymentGateway::class, $paymentGateway);
+        $this->paymentGateway = new FakePaymentGateway;
+        $this->app->instance(PaymentGateway::class, $this->paymentGateway);
 
+    }
+
+    /**
+     * @test
+     */
+    function customer_can_purchase_concert_tickets()
+    {
         $concert = factory(Concert::class)->create([
             'ticket_price' => 3250,
         ]);
 
-        $this->json('POST', "/concerts/{$concert->id}/orders",[
-            'email' => 'me@example.com',
+        $this->json('POST', "/concerts/{$concert->id}/orders", [
+            'email'           => 'me@example.com',
             'ticket_quantity' => 3,
-            'purchase_token' => $paymentGateway->getValidTestToken(),
+            'purchase_token'  => $this->paymentGateway->getValidTestToken(),
         ]);
-        
+
         $this->assertResponseStatus(201);
         $this->assertEquals(9750, $paymentGateway->totalCharges());
-        
+
         $order = $concert->orders()
             ->where('email', 'me@example.com')
             ->first();
@@ -42,4 +46,22 @@ class PurchaseTicketsTest extends TestCase
 
         $this->assertCount(3, $order->tickets);
     }
+
+    /**
+     * @test
+     **/
+    function email_is_required_for_ordering_tickets()
+    {
+        $concert = factory(Concert::class)->create();
+
+        $this->json('POST', "/concerts/{$concert->id}/orders", [
+            'ticket_quantity' => 3,
+            'purchase_token'  => $this->paymentGateway->getValidTestToken(),
+        ]);
+
+        $this->assertResponseStatus(422);
+
+        $this->assertArrayHasKey('email', $this->decodeResponseJson());
+    }
+
 }
