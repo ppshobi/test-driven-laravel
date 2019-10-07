@@ -32,8 +32,15 @@ $factory->define(App\Concert::class, function (Faker\Generator $faker) {
         'venue' => 'The venue',
         'venue_address' => '123 example lane',
         'city' => 'Laraville',
+        'published_at' => Carbon::today(),
         'state' => 'ON',
         'zip' => '17926',
         'additional_information' => 'for tickets, call (555) 555 555'
+    ];
+});
+
+$factory->state(App\Concert::class, 'unpublished', function ($faker) {
+    return [
+        'published_at' => null,
     ];
 });

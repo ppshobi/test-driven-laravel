@@ -20,9 +20,8 @@ class PurchaseTicketsTest extends TestCase
     /**
      * @test
      */
-    function customer_can_purchase_concert_tickets()
+    function customer_can_purchase_tickets_for_published_concert()
     {
-        $this->disableExceptionHandling();
         $concert = factory(Concert::class)->create([
             'ticket_price' => 3250,
         ]);
@@ -43,6 +42,25 @@ class PurchaseTicketsTest extends TestCase
         $this->assertNotNull($order);
 
         $this->assertCount(3, $order->tickets);
+    }
+
+    /**
+     * @test
+     **/
+    function cannot_purchase_tickets_for_unpublished_concerts()
+    {
+        $concert = factory(Concert::class)->states('unpublished')->create();
+
+        $this->json('POST', "/concerts/{$concert->id}/orders", [
+            'email'           => 'me@example.com',
+            'ticket_quantity' => 3,
+            'payment_token'  => $this->paymentGateway->getValidTestToken(),
+        ]);
+
+        $this->assertResponseStatus(404);
+        $this->assertEquals(0, $concert->orders()->count());
+         $this->assertEquals(0, $this->paymentGateway->totalCharges());
+
     }
 
     /**
