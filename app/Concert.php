@@ -44,9 +44,9 @@ class Concert extends Model
         $order = $this->orders()->create([
             'email' => $email,
         ]);
-
-        foreach (range(1, $ticketCount) as $i) {
-            $order->tickets()->create([]);
+        $tickets = $this->tickets()->take($ticketCount)->get();
+        foreach ($tickets as $ticket) {
+            $order->tickets()->save($ticket);
         }
 
         return $order;
@@ -61,6 +61,6 @@ class Concert extends Model
 
     public function ticketsRemaining()
     {
-        return $this->tickets()->count();
+        return $this->tickets()->whereNull('order_id')->count();
     }
 }

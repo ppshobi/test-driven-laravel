@@ -2,9 +2,7 @@
 
 use App\Concert;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ConcertTest extends TestCase
 {
@@ -72,7 +70,7 @@ class ConcertTest extends TestCase
     function  can_order_concert_tickets()
     {
         $concert = factory(Concert::class)->create();
-
+        $concert->addTickets(3);
         $order = $concert->orderTickets('jane@example.org', 3);
 
         $this->assertEquals('jane@example.org', $order->email);
@@ -84,8 +82,21 @@ class ConcertTest extends TestCase
      **/
     function can_add_tickets()
     {
-            $concert = factory(Concert::class)->create();
-            $concert->addTickets(50);
-            $this->assertEquals(50, $concert->ticketsRemaining());
+        $concert = factory(Concert::class)->create();
+        $concert->addTickets(50);
+        $this->assertEquals(50, $concert->ticketsRemaining());
+    }
+
+    /**
+     * @test
+     **/
+    function tickets_remaining_does_not_include_tickets_associated_with_orders()
+    {
+        $concert = factory(Concert::class)->create();
+        $concert->addTickets(50);
+
+        $concert->orderTickets('jane@example.org', 30);
+
+        $this->assertEquals(20, $concert->ticketsRemaining());
     }
 }
