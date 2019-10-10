@@ -3,11 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Exceptions\NotEnoughTicketsException;
 
 class Concert extends Model
 {
     protected $guarded = [];
-    protected $dates = ['date', 'published_at'];
+    protected $dates   = ['date', 'published_at'];
 
     public function getFormattedDateAttribute()
     {
@@ -21,7 +22,7 @@ class Concert extends Model
 
     public function getTicketPriceInDollarsAttribute()
     {
-        return number_format($this->ticket_price/100, 2);
+        return number_format($this->ticket_price / 100, 2);
     }
 
     public function scopePublished($query)
@@ -29,9 +30,22 @@ class Concert extends Model
         return $query->whereNotNull('published_at');
     }
 
-    public function orders()
+    public function orderTickets($email, $ticketCount)
     {
-        return $this->hasMany(Order::class);
+
+        $tickets = $this->tickets()->take($ticketCount)->get();
+
+        if ($tickets->count() < $ticketCount) {
+            throw new NotEnoughTicketsException();
+        }
+        $order = $this->orders()->create([
+            'email' => $email,
+        ]);
+        foreach ($tickets as $ticket) {
+            $order->tickets()->save($ticket);
+        }
+
+        return $order;
     }
 
     public function tickets()
@@ -39,17 +53,9 @@ class Concert extends Model
         return $this->hasMany(Ticket::class);
     }
 
-    public function orderTickets($email, $ticketCount)
+    public function orders()
     {
-        $order = $this->orders()->create([
-            'email' => $email,
-        ]);
-        $tickets = $this->tickets()->take($ticketCount)->get();
-        foreach ($tickets as $ticket) {
-            $order->tickets()->save($ticket);
-        }
-
-        return $order;
+        return $this->hasMany(Order::class);
     }
 
     public function addTickets($quantity)

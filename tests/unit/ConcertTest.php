@@ -2,6 +2,7 @@
 
 use App\Concert;
 use Carbon\Carbon;
+use App\Exceptions\NotEnoughTicketsException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class ConcertTest extends TestCase
@@ -98,5 +99,27 @@ class ConcertTest extends TestCase
         $concert->orderTickets('jane@example.org', 30);
 
         $this->assertEquals(20, $concert->ticketsRemaining());
+    }
+
+    /**
+     * @test
+     **/
+    function trying_to_purchase_more_than_remaining_tickets_throws_an_exception()
+    {
+         $concert = factory(Concert::class)->create();
+        $concert->addTickets(10);
+
+        try {
+            $concert->orderTickets('jane@example.org', 11);
+        }catch (NotEnoughTicketsException $e) {
+
+            $order = $concert->orders()->where('email', 'jane@example.org')->first();
+            $this->assertNull($order);
+
+            $this->assertEquals(10, $concert->ticketsRemaining());
+            return;
+        }
+
+        $this->fail("Order succeeded even though there are not enough tickets");
     }
 }
