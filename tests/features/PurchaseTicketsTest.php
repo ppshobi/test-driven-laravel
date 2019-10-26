@@ -22,9 +22,12 @@ class PurchaseTicketsTest extends TestCase
      */
     function customer_can_purchase_tickets_for_published_concert()
     {
+        $this->disableExceptionHandling();
         $concert = factory(Concert::class)->create([
             'ticket_price' => 3250,
         ]);
+
+        $concert->addTickets(3);
 
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email'           => 'me@example.com',
@@ -85,7 +88,6 @@ class PurchaseTicketsTest extends TestCase
      **/
     function order_is_not_created_if_payment_fails()
     {
-//        $this->disableExceptionHandling();
         $concert = factory(Concert::class)->create();
 
         $this->json('POST', "/concerts/{$concert->id}/orders", [
