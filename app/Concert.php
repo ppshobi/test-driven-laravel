@@ -40,6 +40,7 @@ class Concert extends Model
         }
         $order = $this->orders()->create([
             'email' => $email,
+            'amount' => $this->ticket_price * $ticketCount,
         ]);
         foreach ($tickets as $ticket) {
             $order->tickets()->save($ticket);
@@ -61,8 +62,8 @@ class Concert extends Model
     public function hasOrderFor($email)
     {
         return $this->orders()
-                   ->where('email', $email)
-                   ->count() > 0;
+            ->where('email', $email)
+            ->count() > 0;
     }
 
     public function ordersFor($email)
