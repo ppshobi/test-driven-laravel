@@ -32,7 +32,7 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email'           => 'me@example.com',
             'ticket_quantity' => 3,
-            'payment_token'  => $this->paymentGateway->getValidTestToken(),
+            'purchase_token'  => $this->paymentGateway->getValidTestToken(),
         ]);
 
         $this->assertResponseStatus(201);
@@ -96,7 +96,6 @@ class PurchaseTicketsTest extends TestCase
             'ticket_quantity' => 3,
             'purchase_token'  => 'invalid-payment-token',
         ]);
-
 
         $this->assertResponseStatus(422);
         $order = $concert->orders()
