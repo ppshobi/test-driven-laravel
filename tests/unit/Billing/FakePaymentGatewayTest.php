@@ -23,7 +23,7 @@ class FakePaymentGatewayTest extends TestCase
     /**
      * @test
      **/
-    function charges_with_an_invalid_payment_token_fails()
+    function charges_with_an_invalid_purchase_token_fails()
     {
         try {
             $paymentGateway = new FakePaymentGateway;
