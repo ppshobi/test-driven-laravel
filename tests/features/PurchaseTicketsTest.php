@@ -53,6 +53,7 @@ class PurchaseTicketsTest extends TestCase
     function cannot_purchase_tickets_for_unpublished_concerts()
     {
         $concert = factory(Concert::class)->states('unpublished')->create();
+        $concert->addTickets(3);
 
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email'           => 'me@example.com',
@@ -89,11 +90,11 @@ class PurchaseTicketsTest extends TestCase
     function order_is_not_created_if_payment_fails()
     {
         $concert = factory(Concert::class)->create();
-
+        $concert->addTickets(3);
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email'           => 'jane@example.com',
             'ticket_quantity' => 3,
-            'purchase_token'  => 'invalid-token',
+            'purchase_token'  => 'invalid-payment-token',
         ]);
 
 
