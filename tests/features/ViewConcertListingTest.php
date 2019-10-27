@@ -26,7 +26,7 @@ class ViewConcertListingTest extends TestCase
         $this->see('Concert Sub Title');
         $this->see('December 13, 2019');
         $this->see('8:00pm');
-        $this->see('32.50');
+        $this->see('20.00');
         $this->see('The venue');
         $this->see('123 example lane');
         $this->see('Laraville');
