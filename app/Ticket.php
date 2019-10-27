@@ -19,4 +19,14 @@ class Ticket extends Model
             'order_id' => null,
         ]);
     }
+
+    public function concert()
+    {
+        return $this->belongsTo(Concert::class);
+    }
+
+    public function getPriceAttribute()
+    {
+        return $this->concert->ticket_price;
+    }
 }
