@@ -23,12 +23,18 @@ class StripePaymentGatewayTest extends TestCase
      */
     function charges_with_a_valid_token_are_successful()
     {
-        $paymentGateway = new StripePaymentGateway(config('services.stripe.secret'));
+        $paymentGateway = $this->getPaymentGateway();
+        $newCharges = $paymentGateway->newChargesDuring(function ($paymentGateway) {
+            $paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
+        });
 
-        $paymentGateway->charge(2500, $this->validToken());
+        $this->assertCount(1,$newCharges);
+        $this->assertEquals(2500, $newCharges->sum());
+    }
 
-        $this->assertCount(1, $this->newCharges());
-        $this->assertEquals(2500, $this->lastCharge()->amount);
+    protected function getPaymentGateway()
+    {
+        return new StripePaymentGateway(config('services.stripe.secret'));
     }
 
      /**
@@ -45,21 +51,6 @@ class StripePaymentGatewayTest extends TestCase
         }
 
         $this->fail("charging with an invalid payment token did not threw PaymentFailedException");
-    }
-
-
-    private function validToken()
-    {
-        return Token::create([
-            'card' => [
-                'number'    => '4242424242424242',
-                'exp_month' => 1,
-                'exp_year'  => date('Y') + 1,
-                'cvc'       => "123",
-            ],
-        ],[
-            'api_key' => config('services.stripe.secret')
-        ])->id;
     }
 
     private function lastCharge()
