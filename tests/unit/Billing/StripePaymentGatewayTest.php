@@ -11,25 +11,14 @@ use App\Billing\PaymentFailedException;
  */
 class StripePaymentGatewayTest extends TestCase
 {
+    use PaymentGatewayContractTests;
+
     private $lastCharge;
 
     protected function setUp()
     {
         parent::setUp();
         $this->lastCharge = $this->lastCharge();
-    }
-    /**
-     * @test
-     */
-    function charges_with_a_valid_token_are_successful()
-    {
-        $paymentGateway = $this->getPaymentGateway();
-        $newCharges = $paymentGateway->newChargesDuring(function ($paymentGateway) {
-            $paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
-        });
-
-        $this->assertCount(1,$newCharges);
-        $this->assertEquals(2500, $newCharges->sum());
     }
 
     protected function getPaymentGateway()
