@@ -19,20 +19,19 @@ class ViewConcertListingTest extends TestCase
             'published_at' => Carbon::now()->subWeek(),
         ]);
 
-        $this->visit('/concerts/'.$concert->id);
-
-        $this->see('Concert Title');
-
-        $this->see('Concert Sub Title');
-        $this->see('December 13, 2019');
-        $this->see('8:00pm');
-        $this->see('20.00');
-        $this->see('The venue');
-        $this->see('123 example lane');
-        $this->see('Laraville');
-        $this->see('ON');
-        $this->see('17926');
-        $this->see('for tickets, call (555) 555 555');
+        $response = $this->get('/concerts/'.$concert->id);
+        $response->assertStatus(200);
+        $response->assertSee('Concert Title');
+        $response->assertSee('Concert Sub Title');
+        $response->assertSee('December 13, 2019');
+        $response->assertSee('8:00pm');
+        $response->assertSee('20.00');
+        $response->assertSee('The venue');
+        $response->assertSee('123 example lane');
+        $response->assertSee('Laraville');
+        $response->assertSee('ON');
+        $response->assertSee('17926');
+        $response->assertSee('for tickets, call (555) 555 555');
     }
 
     /**
@@ -45,8 +44,8 @@ class ViewConcertListingTest extends TestCase
             'published_at' => null,
         ]);
 
-        $this->get('/concerts/'.$concert->id);
+        $response = $this->get('/concerts/'.$concert->id);
         
-        $this->assertResponseStatus(404);
+        $response->assertStatus(404);
      }
 }
