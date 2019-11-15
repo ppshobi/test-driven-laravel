@@ -16,3 +16,5 @@ if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
 Route::get('/concerts/{id}', 'ConcertsController@show');
 
 Route::post('/concerts/{id}/orders', 'ConcertOrdersController@store');
+
+Route::get('/orders/{confirmation_number}', 'OrdersController@show');

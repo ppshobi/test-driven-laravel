@@ -2,6 +2,7 @@
 
 use App\Concert;
 use Carbon\Carbon;
+
 /*
 |--------------------------------------------------------------------------
 | Model Factories
@@ -58,5 +59,12 @@ $factory->define(App\Ticket::class, function (Faker\Generator $faker) {
 $factory->state(App\Ticket::class, 'reserved', function ($faker) {
     return [
         'reserved_at' => Carbon::now(),
+    ];
+});
+
+$factory->define(App\Order::class, function (Faker\Generator $faker) {
+    return [
+        'amount' => 5250,
+        'email'  => 'someone@example.com',
     ];
 });
