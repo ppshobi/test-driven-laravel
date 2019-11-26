@@ -30,13 +30,6 @@ class Concert extends Model
         return $query->whereNotNull('published_at');
     }
 
-    public function orderTickets($email, $ticketCount)
-    {
-        $tickets = $this->findTickets($ticketCount);
-
-        return $this->createOrder($email, $tickets);
-    }
-
     public function reserveTickets($quantity, $email)
     {
         $tickets = $this->findTickets($quantity)->each(function($ticket){
@@ -55,11 +48,6 @@ class Concert extends Model
         }
 
         return $tickets;
-    }
-
-    public function createOrder($email, $tickets)
-    {
-        return Order::forTickets($tickets, $email, $tickets->sum('price'));
     }
 
     public function tickets()
