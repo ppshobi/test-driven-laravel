@@ -35,6 +35,7 @@ class Ticket extends Model
         $this->code = TicketCode::generate();
         $order->tickets()->save($this);
     }
+
     public function concert()
     {
         return $this->belongsTo(Concert::class);
