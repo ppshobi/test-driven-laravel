@@ -10,11 +10,10 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
-    error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
-}
+
 Route::get('/concerts/{id}', 'ConcertsController@show');
-
 Route::post('/concerts/{id}/orders', 'ConcertOrdersController@store');
-
 Route::get('/orders/{confirmation_number}', 'OrdersController@show');
+
+Route::post('/login', 'Auth\LoginController@login');
+Route::get('/login', 'Auth\LoginController@showLoginForm');

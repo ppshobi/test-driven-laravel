@@ -6,9 +6,10 @@
     "type": "project",
     "require": {
         "php": ">=5.6.4",
+        "hashids/hashids": "2.0",
+        "laravel/dusk": "1.1.*",
         "laravel/framework": "5.4.*",
-        "stripe/stripe-php": "^7.7",
-        "hashids/hashids" : "2.0"
+        "stripe/stripe-php": "^7.7"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
