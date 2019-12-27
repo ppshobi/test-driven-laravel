@@ -1,9 +1,11 @@
 <?php
+namespace Tests\Unit;
 
 use App\Order;
 use App\Ticket;
 use App\Concert;
 use Carbon\Carbon;
+use Tests\TestCase;
 use App\HashIdsTicketCodeGenerator;
 use App\RandomOrderConfirmationNumberGenerator;
 use Illuminate\Foundation\Testing\DatabaseMigrations;

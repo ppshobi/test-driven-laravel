@@ -1,8 +1,11 @@
 <?php
+namespace Tests\Unit\Billing;
+
 
 use Stripe\Token;
 use Stripe\Stripe;
 use Stripe\Charge;
+use Tests\TestCase;
 use App\Billing\StripePaymentGateway;
 use App\Billing\PaymentFailedException;
 

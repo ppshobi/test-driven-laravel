@@ -1,8 +1,10 @@
 <?php
+namespace Tests\Feature;
 
 use App\Order;
 use App\Ticket;
 use App\Concert;
+use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class ViewOrderTest extends TestCase
@@ -36,7 +38,7 @@ class ViewOrderTest extends TestCase
         $response->assertStatus(200);
 
         $response->assertViewHas('order', function($viewOrder) use ($order){
-            return $order->id == $viewOrder;
+            return $order->id == $viewOrder->id;
         });
 
         $response->assertSee('ORDERCONFIRMATION1234');
