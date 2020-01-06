@@ -9,9 +9,10 @@
 </head>
 <body>
 <form action="/login" method="post">
+    {{ csrf_field() }}
     <div class="form-group">
         <label>Email</label>
-        <input type="email" class="form-control" name="email" value="{{old('email')}}">
+        <input type="email" class="form-control" name="email" value="{{old('email')}}" />
     </div>
     <div class="form-group">
            <label>Password</label>
