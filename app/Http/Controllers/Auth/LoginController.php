@@ -18,8 +18,14 @@ class LoginController extends Controller
         if(! Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
             return redirect('login')->withErrors([
                 'email' => 'Credentials Do not match',
-            ]);
+            ])->withInput(request()->except('password'));
         }
-        return redirect('/backstage/concerts');
+        return redirect('/backstage/concerts/new');
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+        return redirect('/login');
     }
 }
