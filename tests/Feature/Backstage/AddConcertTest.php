@@ -3,6 +3,8 @@
 namespace Tests\Feature\Backstage;
 
 use App\User;
+use App\Concert;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -34,5 +36,72 @@ class AddConcertTest extends TestCase
 
         $response->assertStatus(302);
         $response->assertRedirect('/login');
+    }
+
+    /**
+     * @test
+     **/
+    function adding_a_valid_concert()
+    {
+        $this->disableExceptionHandling();
+        $user = factory(User::class)->create();
+
+        $response = $this->actingAs($user)->post('/backstage/concerts/',[
+            'title' => 'The red chord',
+            'subtitle' => 'with animosity & lethargy',
+            'additional_information' => 'this concert is 19+',
+            'venue' => 'The mosh pit',
+            'venue_address' => '123 example lane',
+            'city' => 'laraville',
+            'state' => 'ON',
+            'zip' => '673565',
+            'date' =>'2017-11-18',
+            'time' =>'8:00pm',
+            'ticket_price' => '32.50',
+            'ticket_quantity' => '75',
+        ]);
+
+        tap(Concert::first(), function ($concert) use ($response){
+            $response->assertStatus(302);
+            $response->assertRedirect("/concerts/{$concert->id}");
+            $this->assertEquals("The red chord", $concert->title);
+            $this->assertEquals("with animosity & lethargy", $concert->subtitle);
+            $this->assertEquals("this concert is 19+", $concert->additional_information);
+            $this->assertEquals(Carbon::parse('2017-11-18 8:00pm'), $concert->date);
+            $this->assertEquals("The mosh pit", $concert->venue);
+            $this->assertEquals("123 example lane", $concert->venue_address);
+            $this->assertEquals("laraville", $concert->city);
+            $this->assertEquals("ON", $concert->state);
+            $this->assertEquals("673565", $concert->zip);
+            $this->assertEquals(3250, $concert->ticket_price);
+            $this->assertEquals(75, $concert->ticketsRemaining());
+
+
+        });
+    }
+
+    /**
+     * @test
+     **/
+    function guests_cant_add_new_concerts()
+    {
+        $response = $this->post('/backstage/concerts/',[
+            'title' => 'The red chord',
+            'subtitle' => 'with animosity & lethargy',
+            'additional_information' => 'this concert is 19+',
+            'venue' => 'The mosh pit',
+            'venue_address' => '123 example lane',
+            'city' => 'laraville',
+            'state' => 'ON',
+            'zip' => '673565',
+            'date' =>'2017-11-18',
+            'time' =>'8:00pm',
+            'ticket_price' => '32.50',
+            'ticket_quantity' => '75',
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertRedirect('/login');
+        $this->assertEquals(0, Concert::count());
     }
 }
