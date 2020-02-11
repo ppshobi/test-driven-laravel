@@ -28,5 +28,6 @@ Route::group([
 ], function () {
     Route::get('/concerts', 'ConcertsController@index');
     Route::post('/concerts', 'ConcertsController@store');
-    Route::get('/concerts/new', 'ConcertsController@create');
+    Route::get('/concerts/new', 'ConcertsController@create')->name('backstage.concerts.new');
+    Route::get('/concerts/{concert}/edit', 'ConcertsController@edit')->name('backstage.concerts.edit');
 });
