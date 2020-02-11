@@ -13,12 +13,6 @@ class AddConcertTest extends TestCase
 {
     use DatabaseMigrations;
 
-    private function from($url)
-    {
-        session()->setPreviousUrl(url($url));
-        return $this;
-    }
-
     private function validParams($overRides = [])
     {
         return array_merge([
