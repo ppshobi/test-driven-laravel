@@ -58,8 +58,8 @@ class ConcertsController extends Controller
 
     public function update($id)
     {
-        $concert = Concert::findOrFail($id);
-         $concert->update([
+        $concert = Auth::user()->concerts()->findOrFail($id);
+        $concert->update([
                 'title'                  => request()->title,
                 'subtitle'               => request()->subtitle,
                 'additional_information' => request()->additional_information,
