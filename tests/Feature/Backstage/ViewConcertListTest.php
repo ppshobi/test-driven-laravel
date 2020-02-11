@@ -7,11 +7,21 @@ namespace Tests\Feature\Backstage;
 use App\User;
 use App\Concert;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class ViewConcertListTest extends TestCase
 {
     use DatabaseMigrations;
+
+    protected function setUp()
+    {
+        parent::setUp();
+        TestResponse::macro('data', function ($key){
+            return $this->original->getData()[$key];
+        });
+    }
+    
     /**
      * @test
      **/
@@ -40,9 +50,9 @@ class ViewConcertListTest extends TestCase
         $response = $this->actingAs($user)->get('/backstage/concerts');
 
         $response->assertStatus(200);
-        $this->assertTrue($response->original->getData()['concerts']->contains($concertA));
-        $this->assertTrue($response->original->getData()['concerts']->contains($concertB));
-        $this->assertTrue($response->original->getData()['concerts']->contains($concertD));
-        $this->assertFalse($response->original->getData()['concerts']->contains($concertC));
+        $this->assertTrue($response->data('concerts')->contains($concertA));
+        $this->assertTrue($response->data('concerts')->contains($concertB));
+        $this->assertTrue($response->data('concerts')->contains($concertD));
+        $this->assertFalse($response->data('concerts')->contains($concertC));
     }
 }
