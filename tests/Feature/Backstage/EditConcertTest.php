@@ -136,6 +136,7 @@ class EditConcertTest extends TestCase
             'state'                  => 'Old ON',
             'zip'                    => '000000',
             'additional_information' => 'Old for tickets, call (555) 555 555',
+            'published_at'           => null,
         ]);
 
         $this->assertFalse($concert->isPublished());
@@ -145,7 +146,7 @@ class EditConcertTest extends TestCase
             'subtitle'               => 'new Concert Sub Title',
             'date'                   => '2019-01-01',
             'time'                   => '8:00pm',
-            'ticket_price'           => '7250',
+            'ticket_price'           => '72.50',
             'venue'                  => 'new The venue',
             'venue_address'          => 'new 123 example lane',
             'city'                   => 'new Laraville',
@@ -164,7 +165,6 @@ class EditConcertTest extends TestCase
             $this->assertEquals('new The venue', $concert->venue);
             $this->assertEquals('new 123 example lane', $concert->venue_address);
             $this->assertEquals('new Laraville', $concert->city);
-            $this->assertEquals(Carbon::today(), $concert->published_at);
             $this->assertEquals('new ON', $concert->state);
             $this->assertEquals('999999', $concert->zip);
             $this->assertEquals('new for tickets, call (555) 555 555', $concert->additional_information);
