@@ -4,6 +4,7 @@ namespace Tests\Feature\Backstage;
 
 use App\User;
 use App\Concert;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -124,10 +125,49 @@ class EditConcertTest extends TestCase
 
         $user = factory(User::class)->create();
         $concert = factory(Concert::class)->create([
-            'user_id' => $user->id,
-            ''
+            'user_id'                =>  $user->id,
+            'title'                  => 'Old Concert Title',
+            'subtitle'               => 'Old Concert Sub Title',
+            'date'                   => Carbon::parse('2017-01-01 5:00pm'),
+            'ticket_price'           => 2000,
+            'venue'                  => 'Old The venue',
+            'venue_address'          => 'Old 123 example lane',
+            'city'                   => 'Old Laraville',
+            'state'                  => 'Old ON',
+            'zip'                    => '000000',
+            'additional_information' => 'Old for tickets, call (555) 555 555',
         ]);
 
+        $this->assertFalse($concert->isPublished());
 
+        $response = $this->actingAs($user)->patch("/backstage/concerts/{$concert->id}", [
+            'title'                  => 'new Concert Title',
+            'subtitle'               => 'new Concert Sub Title',
+            'date'                   => '2019-01-01',
+            'time'                   => '8:00pm',
+            'ticket_price'           => '7250',
+            'venue'                  => 'new The venue',
+            'venue_address'          => 'new 123 example lane',
+            'city'                   => 'new Laraville',
+            'state'                  => 'new ON',
+            'zip'                    => '999999',
+            'additional_information' => 'new for tickets, call (555) 555 555',
+        ]);
+
+        $response->assertRedirect('/backstage/concerts');
+
+        tap($concert->fresh(), function ($concert) {
+            $this->assertEquals('new Concert Title', $concert->title);
+            $this->assertEquals('new Concert Sub Title', $concert->subtitle);
+            $this->assertEquals(Carbon::parse('2019-01-01 8:00pm'), $concert->date);
+            $this->assertEquals(7250, $concert->ticket_price);
+            $this->assertEquals('new The venue', $concert->venue);
+            $this->assertEquals('new 123 example lane', $concert->venue_address);
+            $this->assertEquals('new Laraville', $concert->city);
+            $this->assertEquals(Carbon::today(), $concert->published_at);
+            $this->assertEquals('new ON', $concert->state);
+            $this->assertEquals('999999', $concert->zip);
+            $this->assertEquals('new for tickets, call (555) 555 555', $concert->additional_information);
+        });
     }
 }
