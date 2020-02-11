@@ -6,11 +6,20 @@ use App\User;
 use App\Concert;
 use Carbon\Carbon;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class EditConcertTest extends TestCase
 {
     use DatabaseMigrations;
+    protected function setUp()
+    {
+        parent::setUp();
+
+        TestResponse::macro('data', function ($key){
+            return $this->original->getData()[$key];
+        });
+    }
 
     private function validParams($overRides = [])
     {
@@ -37,7 +46,7 @@ class EditConcertTest extends TestCase
         $this->disableExceptionHandling();
 
         $user = factory(User::class)->create();
-        $concert = factory(Concert::class)->create(['user_id' => $user->id]);
+        $concert = factory(Concert::class)->states('unpublished')->create(['user_id' => $user->id]);
         $this->assertFalse($concert->isPublished());
 
         $response = $this->actingAs($user)->get("/backstage/concerts/{$concert->id}/edit");
@@ -51,10 +60,8 @@ class EditConcertTest extends TestCase
      **/
     function promoters_cannot_view_the_edit_form_for_their_own_published_concerts()
     {
-        $this->disableExceptionHandling();
-
         $user = factory(User::class)->create();
-        $concert = factory(Concert::class)->states('published')->create(['user_id' => $user->id]);
+        $concert = factory(Concert::class)->create(['user_id' => $user->id]);
         $this->assertTrue($concert->isPublished());
 
         $response = $this->actingAs($user)->get("/backstage/concerts/{$concert->id}/edit");
@@ -67,8 +74,6 @@ class EditConcertTest extends TestCase
      **/
     function promoters_cannot_view_the_edit_form_for_other_concerts()
     {
-        $this->disableExceptionHandling();
-
         $user = factory(User::class)->create();
         $otherUser = factory(User::class)->create();
         $otherConcert = factory(Concert::class)->create(['user_id' => $otherUser->id]);
@@ -105,11 +110,11 @@ class EditConcertTest extends TestCase
      /**
      * @test
      **/
-    function  guests_are_asked_to_login_when_attempting_to_view_the_edit_form_for_a_non_existent_concert()
+    function guests_are_asked_to_login_when_attempting_to_view_the_edit_form_for_a_non_existent_concert()
     {
         $user     = factory(User::class)->create();
 
-        $response = $this->actingAs($user)->get("/backstage/concerts/999/edit");
+        $response = $this->get("/backstage/concerts/999/edit");
 
         $response->assertStatus(302);
         $response->assertRedirect('/login');
