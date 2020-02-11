@@ -13,6 +13,11 @@ class AddConcertTest extends TestCase
 {
     use DatabaseMigrations;
 
+    private function from($url)
+    {
+        session()->setPreviousUrl(url($url));
+        return $this;
+    }
     /**
      * @test
      **/
@@ -64,6 +69,7 @@ class AddConcertTest extends TestCase
         tap(Concert::first(), function ($concert) use ($response){
             $response->assertStatus(302);
             $response->assertRedirect("/concerts/{$concert->id}");
+
             $this->assertEquals("The red chord", $concert->title);
             $this->assertEquals("with animosity & lethargy", $concert->subtitle);
             $this->assertEquals("this concert is 19+", $concert->additional_information);
@@ -75,8 +81,6 @@ class AddConcertTest extends TestCase
             $this->assertEquals("673565", $concert->zip);
             $this->assertEquals(3250, $concert->ticket_price);
             $this->assertEquals(75, $concert->ticketsRemaining());
-
-
         });
     }
 
@@ -102,6 +106,36 @@ class AddConcertTest extends TestCase
 
         $response->assertStatus(302);
         $response->assertRedirect('/login');
+        $this->assertEquals(0, Concert::count());
+    }
+
+    /**
+     * @test
+     **/
+    function title_is_required()
+    {
+        $user = factory(User::class)->create();
+
+        $response = $this->actingAs($user)
+            ->from('/backstage/concerts/new')
+            ->post('/backstage/concerts/',[
+                'title' => '',
+                'subtitle' => 'with animosity & lethargy',
+                'additional_information' => 'this concert is 19+',
+                'venue' => 'The mosh pit',
+                'venue_address' => '123 example lane',
+                'city' => 'laraville',
+                'state' => 'ON',
+                'zip' => '673565',
+                'date' =>'2017-11-18',
+                'time' =>'8:00pm',
+                'ticket_price' => '32.50',
+                'ticket_quantity' => '75',
+            ]);
+
+        $response->assertStatus(302);
+        $response->assertRedirect('/backstage/concerts/new');
+        $response->assertSessionHasErrors(['title']);
         $this->assertEquals(0, Concert::count());
     }
 }
