@@ -50,6 +50,11 @@ class Concert extends Model
         return $tickets;
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
@@ -58,7 +63,6 @@ class Concert extends Model
     public function orders()
     {
         return $this->belongsToMany(Order::class, 'tickets');
-
     }
 
     public function hasOrderFor($email)

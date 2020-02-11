@@ -1,5 +1,6 @@
 <?php
 
+use App\User;
 use App\Concert;
 use Carbon\Carbon;
 
@@ -29,6 +30,9 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 $factory->define(App\Concert::class, function (Faker\Generator $faker) {
     return [
         'title' => 'Concert Title',
+        'user_id' => function(){
+            return factory(User::class)->create()->id;
+        },
         'subtitle' => 'Concert Sub Title',
         'date' => Carbon::parse('+2 weeks'),
         'ticket_price' => 2000,

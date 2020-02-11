@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Backstage;
 use App\Concert;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ConcertsController extends Controller
 {
@@ -21,7 +22,7 @@ class ConcertsController extends Controller
             'title' => ['required']
         ]);
 
-        $concert = Concert::create([
+        $concert = Auth::user()->concerts()->create([
             'title'                  => request()->title,
             'subtitle'               => request()->subtitle,
             'additional_information' => request()->additional_information,
