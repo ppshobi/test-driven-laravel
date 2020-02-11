@@ -18,6 +18,24 @@ class AddConcertTest extends TestCase
         session()->setPreviousUrl(url($url));
         return $this;
     }
+
+    private function validParams($overRides = [])
+    {
+        return array_merge([
+            'title' => 'The red chord',
+            'subtitle' => 'with animosity & lethargy',
+            'additional_information' => 'this concert is 19+',
+            'venue' => 'The mosh pit',
+            'venue_address' => '123 example lane',
+            'city' => 'laraville',
+            'state' => 'ON',
+            'zip' => '673565',
+            'date' =>'2017-11-18',
+            'time' =>'8:00pm',
+            'ticket_price' => '32.50',
+            'ticket_quantity' => '75',
+        ], $overRides);
+    }
     /**
      * @test
      **/
@@ -89,20 +107,7 @@ class AddConcertTest extends TestCase
      **/
     function guests_cant_add_new_concerts()
     {
-        $response = $this->post('/backstage/concerts/',[
-            'title' => 'The red chord',
-            'subtitle' => 'with animosity & lethargy',
-            'additional_information' => 'this concert is 19+',
-            'venue' => 'The mosh pit',
-            'venue_address' => '123 example lane',
-            'city' => 'laraville',
-            'state' => 'ON',
-            'zip' => '673565',
-            'date' =>'2017-11-18',
-            'time' =>'8:00pm',
-            'ticket_price' => '32.50',
-            'ticket_quantity' => '75',
-        ]);
+        $response = $this->post('/backstage/concerts/',$this->validParams());
 
         $response->assertStatus(302);
         $response->assertRedirect('/login');
@@ -118,20 +123,9 @@ class AddConcertTest extends TestCase
 
         $response = $this->actingAs($user)
             ->from('/backstage/concerts/new')
-            ->post('/backstage/concerts/',[
+            ->post('/backstage/concerts/',$this->validParams([
                 'title' => '',
-                'subtitle' => 'with animosity & lethargy',
-                'additional_information' => 'this concert is 19+',
-                'venue' => 'The mosh pit',
-                'venue_address' => '123 example lane',
-                'city' => 'laraville',
-                'state' => 'ON',
-                'zip' => '673565',
-                'date' =>'2017-11-18',
-                'time' =>'8:00pm',
-                'ticket_price' => '32.50',
-                'ticket_quantity' => '75',
-            ]);
+            ]));
 
         $response->assertStatus(302);
         $response->assertRedirect('/backstage/concerts/new');
@@ -147,36 +141,35 @@ class AddConcertTest extends TestCase
         $this->disableExceptionHandling();
         $user = factory(User::class)->create();
 
-        $response = $this->actingAs($user)->post('/backstage/concerts/',[
-            'title' => 'The red chord',
+        $response = $this->actingAs($user)->post('/backstage/concerts/',$this->validParams([
             'subtitle' => '',
-            'additional_information' => 'this concert is 19+',
-            'venue' => 'The mosh pit',
-            'venue_address' => '123 example lane',
-            'city' => 'laraville',
-            'state' => 'ON',
-            'zip' => '673565',
-            'date' =>'2017-11-18',
-            'time' =>'8:00pm',
-            'ticket_price' => '32.50',
-            'ticket_quantity' => '75',
-        ]);
+        ]));
 
         tap(Concert::first(), function ($concert) use ($response){
             $response->assertStatus(302);
             $response->assertRedirect("/concerts/{$concert->id}");
 
-            $this->assertEquals("The red chord", $concert->title);
             $this->assertNull($concert->subtitle);
-            $this->assertEquals("this concert is 19+", $concert->additional_information);
-            $this->assertEquals(Carbon::parse('2017-11-18 8:00pm'), $concert->date);
-            $this->assertEquals("The mosh pit", $concert->venue);
-            $this->assertEquals("123 example lane", $concert->venue_address);
-            $this->assertEquals("laraville", $concert->city);
-            $this->assertEquals("ON", $concert->state);
-            $this->assertEquals("673565", $concert->zip);
-            $this->assertEquals(3250, $concert->ticket_price);
-            $this->assertEquals(75, $concert->ticketsRemaining());
+        });
+    }
+
+    /**
+     * @test
+     */
+    function additional_information_is_optional()
+    {
+        $this->disableExceptionHandling();
+        $user = factory(User::class)->create();
+
+        $response = $this->actingAs($user)->post('/backstage/concerts/',$this->validParams([
+            'additional_information' => '',
+        ]));
+
+        tap(Concert::first(), function ($concert) use ($response){
+            $response->assertStatus(302);
+            $response->assertRedirect("/concerts/{$concert->id}");
+
+            $this->assertNull($concert->additional_information);
         });
     }
 }
