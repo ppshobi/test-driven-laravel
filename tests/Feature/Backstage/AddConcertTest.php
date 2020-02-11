@@ -89,7 +89,7 @@ class AddConcertTest extends TestCase
             $response->assertRedirect("/concerts/{$concert->id}");
 
             $this->assertTrue($concert->user->is($user));
-
+            $this->assertTrue($concert->isPublished());
             $this->assertEquals("The red chord", $concert->title);
             $this->assertEquals("with animosity & lethargy", $concert->subtitle);
             $this->assertEquals("this concert is 19+", $concert->additional_information);
