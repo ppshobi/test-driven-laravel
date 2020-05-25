@@ -24,7 +24,8 @@ class ConcertsController extends Controller
     public function store()
     {
         $this->validate(request(), [
-            'title' => ['required']
+            'title' => 'required',
+            'ticket_quantity' => 'required|integer|min:1',
         ]);
 
         $concert = Auth::user()->concerts()->create([
@@ -38,6 +39,7 @@ class ConcertsController extends Controller
             'zip'                    => request()->zip,
             'date'                   => Carbon::parse(vsprintf("%s %s", [request()->date, request()->time])),
             'ticket_price'           => request()->ticket_price*100,
+            'ticket_quantity'        => request()->ticket_quantity,
         ])->addTickets(request()->ticket_quantity);
 
         $concert->publish();
@@ -57,12 +59,14 @@ class ConcertsController extends Controller
 
     public function update($id)
     {
+        $concert = Auth::user()->concerts()->findOrFail($id);
+        abort_if($concert->isPublished(), 403);
+
         $this->validate(request(), [
             'title' => 'required',
+            'ticket_quantity' => 'required|integer|min:1',
         ]);
-        $concert = Auth::user()->concerts()->findOrFail($id);
 
-        abort_if($concert->isPublished(), 403);
 
         $concert->update([
                 'title'                  => request()->title,
@@ -75,6 +79,7 @@ class ConcertsController extends Controller
                 'zip'                    => request()->zip,
                 'date'                   => Carbon::parse(vsprintf("%s %s", [request()->date, request()->time])),
                 'ticket_price'           => request()->ticket_price*100,
+                'ticket_quantity'        => (int) request()->ticket_quantity,
             ]);
 
         return redirect()->route('backstage.concerts.index');

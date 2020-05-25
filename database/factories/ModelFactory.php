@@ -35,14 +35,15 @@ $factory->define(App\Concert::class, function (Faker\Generator $faker) {
         },
         'subtitle' => 'Concert Sub Title',
         'date' => Carbon::parse('+2 weeks'),
-        'ticket_price' => 2000,
         'venue' => 'The venue',
         'venue_address' => '123 example lane',
         'city' => 'Laraville',
         'published_at' => Carbon::today(),
         'state' => 'ON',
         'zip' => '17926',
-        'additional_information' => 'for tickets, call (555) 555 555'
+        'additional_information' => 'for tickets, call (555) 555 555',
+        'ticket_price' => 2000,
+        'ticket_quantity' => 5
     ];
 });
 
@@ -51,7 +52,11 @@ $factory->state(App\Concert::class, 'unpublished', function ($faker) {
         'published_at' => null,
     ];
 });
-
+$factory->state(App\Concert::class, 'published', function ($faker) {
+    return [
+        'published_at' => Carbon::now(),
+    ];
+});
 $factory->define(App\Ticket::class, function (Faker\Generator $faker) {
     return [
         'concert_id' => function() {
